@@ -6,5 +6,5 @@ fun main(args: Array<String>) {
     //println("Program arguments: ${args.joinToString()}")
 
 
-    Day14.run1_3()
+    Day14.run1_4()
 }
