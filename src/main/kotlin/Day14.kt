@@ -206,7 +206,7 @@ object Day14 {
      * Third iteration uses a more proper iterator, it seems to generate a long sequence of letters properly.
      * This no longer runs out of memory. Instead, it runs out of time.
      */
-    private fun process2(data: String): Pair<CharArray, Map<String, Char>> {
+    fun process2(data: String): Pair<CharArray, Map<String, Char>> {
         val rows = data.lines()
 
         val template = rows.first().toCharArray()
@@ -218,30 +218,21 @@ object Day14 {
     fun work3(data: Pair<CharArray, Map<String, Char>>, steps: Int) {
         println("Input length: " + data.first.size)
 
-        val count = ruleIterator(data.first.iterator(), data.second, steps, true).asSequence().groupingBy { it }.eachCount().toList().sortedBy { it.second }
+        val count = ruleIterator(data.first.iterator(), data.second, steps).asSequence().groupingBy { it }.eachCount().toList().sortedBy { it.second }
         println(count)
 
         println("Most - least is " + (count.last().second-count.first().second))
     }
 
-    // For debugging
-    fun print3(data: Pair<CharArray, Map<String, Char>>, steps: Int) {
-        println("Input length: " + data.first.size)
-
-        for (char in ruleIterator(data.first.iterator(), data.second, steps, true).asSequence()) {
-            println(char)
-        }
-    }
-
     // To save on memory we create an iterator to generate new characters at a given "depth". And we can feed it characters
     // using a recursive iterator. Step 0 means we simply return the input sequence.
-    private fun ruleIterator(data: Iterator<Char>, rules: Map<String, Char>, steps: Int, top: Boolean): Iterator<Char> = iterator {
+    private fun ruleIterator(data: Iterator<Char>, rules: Map<String, Char>, steps: Int): Iterator<Char> = iterator {
         if(steps == 0) {
             while (data.hasNext()) {
                 yield(data.next())
             }
         } else {
-            val recData: Iterator<Char> = ruleIterator(data, rules, steps-1, false)
+            val recData: Iterator<Char> = ruleIterator(data, rules, steps-1)
 
             var first = recData.next()
             while(recData.hasNext()) {
@@ -274,9 +265,6 @@ object Day14 {
         val cache = buildCache(data.second, reps)
 
         val inputPairs = data.first.toCharArray().asList().windowed(2).map { it.joinToString(separator = "") + reps }
-
-        println("input string " + data.first)
-        println("input pairs $inputPairs")
 
         val result = addUpPairs(
             inputPairs.map { cache[it]?.toList() ?: emptyList() }.flatten() + countLetters(data.first).toList()
@@ -330,10 +318,10 @@ object Day14 {
         }
 
         // Dump the resulting cache to std out for debugging
-        println("Cache content")
-        cacheNext.entries.forEach {
-            println("${it.key} has characters ${it.value.entries}")
-        }
+//        println("Cache content")
+//        cacheNext.entries.forEach {
+//            println("${it.key} has characters ${it.value.entries}")
+//        }
 
         return cacheNext
     }
@@ -344,26 +332,6 @@ object Day14 {
     private fun countLetters(input: String): CacheLine =
         input.toCharArray().toList().groupingBy { it }.eachCount().mapValues { it.value.toLong() }
 
-
-    fun run1() {
-        work1(process1(data2), 10)
-    }
-
-    fun run2() {
-        work1(process1(data2), 40)
-    }
-
-    fun run1_2() {
-        work2(process1(data1), 40)
-    }
-
-    fun run1_3() {
-        work3(process2(data2), 10)
-    }
-
-    fun run1_4() {
-        work4(process1(data2), 40)
-    }
 }
 
 typealias CacheLine = Map<Char, Long>
